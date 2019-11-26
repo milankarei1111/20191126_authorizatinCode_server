@@ -1,78 +1,73 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# OAuth 2.0 passport(授權碼模式) 
+----
+## 影片教學
+ [laravel6 授权码 1 配置]
+(https://www.bilibili.com/video/av74879198?p=7)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+[laravel6 授权码 2 ]
+(https://www.bilibili.com/video/av74879198?p=8)
 
-## About Laravel
+----
+### 實作:服務器端(微信 ex:lisan.com) 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+時間 01:22 
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+http://localhost:9988
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+----
+## 準備工作
+1. 建立專案
+2. .env 資料庫配置 *如果你在同一台機器上,請在config文件夾配置你的項目,避免環境變量衝突
 
-## Learning Laravel
+3. 修改資料庫默認字串長度,因應後面套件包產生的表名長度會過長 AppServiceProvider 的 boot() 加入 Schema::defaultStringLength(191);
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+4. composer require laravel/passport
+5. Laravel\Passport\HasApiTokens Trait	將此特徵引入App\Usr模型中
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+----
+## 安裝前端必備(腳手架)
 
-## Laravel Sponsors
+** 事前須先下載node
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+* 建立專案
+* composer require laravel/ui
+* php artisan ui vue --auth
+* npm install cnpm -g --registry=https://registry.npm.taobao.org	
+* cnpm install
+* cnpm run prod
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
+----
+## 安裝Guzzle套件包發送http請求 
+* composer require guzzlehttp/guzzle
 
-## Contributing
+----
+## 配置passport認證
+* config/auth.php 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   'api' => ['driver' => 'passport']
 
-## Code of Conduct
+----
+## 遷移資料庫
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+* php artisan migrate // 創建表來儲存客戶端和 access_token
+* php artisan passport:keys // 加密生成的access_token
 
-## Security Vulnerabilities
+----
+## 註冊路由 (AuthServiceProvider文件夾)
+    Passport::routes();
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+>加入過期時間
 
-## License
+    Passport::tokensExpireIn(now()->addDays(15));
+    Passport::refreshTokensExpireIn(now()->addDays(60));
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+----
+## 創建客戶端(嗶哩嗶哩)
+    php artisan passport:client
+
+        Which user ID should the client be assigned to?: 自動設置
+
+        What should we name the client?: bili
+
+        Where should we redirect the request after authorization?:
+	    http://localhost:9987/auth/callback
